@@ -27,6 +27,10 @@ void updatePaddle(Paddle* p);
 
 void updateAI(Paddle* p, Ball* b);
 
+void _bounds_check(float* y, float* h);
+Rectangle _paddle2vec4(Paddle* p);
+Vector2 _ball2vec2(Ball* b);
+
 int main(void) {
     const int windowWidth = 800;
     const int windowHeight = 450;
@@ -54,6 +58,14 @@ int main(void) {
             updateBall(&ball);
             updatePaddle(&player);
             updateAI(&ai, &ball);
+
+            // Check if the Ball has collided with the paddle
+            if (CheckCollisionCircleRec(_ball2vec2(&ball), ball.radius, _paddle2vec4(&player))) {
+                ball.sx *= -1;
+            }
+            if (CheckCollisionCircleRec(_ball2vec2(&ball), ball.radius, _paddle2vec4(&ai))) {
+                ball.sx *= -1;
+            }
 
             ClearBackground(BACKGROUND);
 
@@ -108,13 +120,21 @@ void drawPaddle(Paddle* p) {
     DrawRectangle(p->x, p->y, p->w, p->h, p->color);
 }
 
-void _bounds_check(float* y, float* h);
-
 void updatePaddle(Paddle* p) {
     if (IsKeyDown(KEY_UP)) {
         p->y -= p->s;
     }
     if (IsKeyDown(KEY_DOWN)) {
+        p->y += p->s;
+    }
+    _bounds_check(&p->y, &p->h);
+}
+
+void updateAI(Paddle* p, Ball* b) {
+    if (p->y + p->h/2 > b->cy) {
+        p->y -= p->s;
+    }
+    if (p->y + p->h/2 <= b->cy) {
         p->y += p->s;
     }
     _bounds_check(&p->y, &p->h);
@@ -130,12 +150,10 @@ void _bounds_check(float* y, float* h) {
     }
 }
 
-void updateAI(Paddle* p, Ball* b) {
-    if (p->y + p->h/2 > b->cy) {
-        p->y -= p->s;
-    }
-    if (p->y + p->h/2 <= b->cy) {
-        p->y += p->s;
-    }
-    _bounds_check(&p->y, &p->h);
+Rectangle _paddle2vec4(Paddle* p) {
+    return (Rectangle) {p->x, p->y, p->w, p->h};
+}
+
+Vector2 _ball2vec2(Ball* b) {
+    return (Vector2) {b->cx, b->cy};
 }
