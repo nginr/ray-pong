@@ -1,7 +1,5 @@
 #include <raylib.h>
 
-
-
 typedef struct Ball {
     int cx, cy;
     float radius;
@@ -13,10 +11,6 @@ typedef struct Ball {
 void makeBall(Ball* b, int cx, int cy, float r, Color c);
 void drawBall(Ball* b);
 void updateBall(Ball* b);
-void updateBall(Ball* b) {
-    b->cx += b->sx;
-    b->cy += b->sy;
-}
 
 int main(void) {
     const int windowWidth = 800;
@@ -36,6 +30,8 @@ int main(void) {
 
     while ( !WindowShouldClose() ) {
         BeginDrawing();
+            updateBall(&ball);
+
             ClearBackground(BACKGROUND);
 
             DrawLine(windowWidth/2, 0, windowWidth/2, windowWidth, WHITE);
@@ -54,9 +50,21 @@ void makeBall(Ball* b, int cx, int cy, float r, Color c) {
     b->cx = cx; b->cy = cy;
     b->radius = r;
     b->color = c;
-    b->sx = 0; b->sy = 0;
+    b->sx = 4; b->sy = 4;
 }
 
 void drawBall(Ball* b) {
     DrawCircle(b->cx, b->cy, b->radius, b->color);
+}
+
+void updateBall(Ball* b) {
+    b->cx += b->sx;
+    b->cy += b->sy;
+
+    if (b->cx+b->radius >= GetScreenWidth() || b->cx - b->radius <= 0) {
+        b->sx *= -1;
+    }
+    if (b->cy+b->radius >= GetScreenHeight() || b->cy - b->radius <= 0) {
+        b->sy *= -1;
+    }
 }
