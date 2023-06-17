@@ -25,6 +25,8 @@ void makePaddle(Paddle* p, float x, float y, float w, float h, Color c);
 void drawPaddle(Paddle* p);
 void updatePaddle(Paddle* p);
 
+void updateAI(Paddle* p, Ball* b);
+
 int main(void) {
     const int windowWidth = 800;
     const int windowHeight = 450;
@@ -51,6 +53,7 @@ int main(void) {
         BeginDrawing();
             updateBall(&ball);
             updatePaddle(&player);
+            updateAI(&ai, &ball);
 
             ClearBackground(BACKGROUND);
 
@@ -125,4 +128,14 @@ void _bounds_check(float* y, float* h) {
     if (*y + *h >= GetScreenHeight()) {
         *y = GetScreenHeight() - *h;
     }
+}
+
+void updateAI(Paddle* p, Ball* b) {
+    if (p->y + p->h/2 > b->cy) {
+        p->y -= p->s;
+    }
+    if (p->y + p->h/2 <= b->cy) {
+        p->y += p->s;
+    }
+    _bounds_check(&p->y, &p->h);
 }
