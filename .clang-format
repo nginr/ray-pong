@@ -1,0 +1,12 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: Never
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+IndentCaseLabels: true
+SpaceBeforeAssignmentOperators: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles: false
+SpaceBeforeCpp11BracedList: true
+SpaceAfterCStyleCast: false
