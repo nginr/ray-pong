@@ -1,5 +1,6 @@
 # ray-pong
 A pong clone made with raylib.
+![A Pong Clone](assets/screenshot.png)
 
 Build instruction:
 ```sh
