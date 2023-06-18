@@ -40,6 +40,15 @@ void _checkBallPaddleCollision(Ball* b, Paddle* p, Paddle* ai);
 
 int _getHalfScreenWidth();
 int _getHalfScreenHeight();
+int _getQuarterScreenWidth();
+int _getQuarterScreenHeight();
+int _getPaddleWidth();
+int _getPaddleHeight();
+int _getHalfPaddleWidth();
+int _getHalfPaddleHeight();
+int _getBallRadius();
+int _getPadding();
+int _getFontSize();
 
 int player_score = 0;
 int ai_score = 0;
@@ -50,19 +59,17 @@ int main(void) {
 
     const char* windowName = "Pong";
 
-    const int paddleWidth = 20;
-    const int paddleHeight = 120;
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(windowWidth, windowHeight, windowName);
+    SetTargetFPS(60);
 
     Ball ball = {0};
     Paddle player = {0};
     Paddle ai = {0};
 
-    makeBall(&ball, windowWidth*0.5, windowHeight*0.5, 10, RED);
-    makePaddle(&player, windowWidth - paddleWidth - 10, windowHeight*0.5 - paddleHeight*0.5, paddleWidth, paddleHeight, RED);
-    makePaddle(&ai, 0 + 10, windowHeight*0.5 - paddleHeight*0.5, paddleWidth, paddleHeight, RED);
-
-    InitWindow(windowWidth, windowHeight, windowName);
-    SetTargetFPS(60);
+    makeBall(&ball, _getHalfScreenWidth(), _getHalfScreenHeight(), _getBallRadius(), RED);
+    makePaddle(&player, GetScreenWidth() - _getPaddleWidth() - _getPadding(), _getHalfScreenHeight() - _getHalfPaddleHeight(), _getPaddleWidth(), _getPaddleHeight(), RED);
+    makePaddle(&ai, _getPadding(), _getHalfScreenHeight() - _getHalfPaddleHeight(), _getPaddleWidth(), _getPaddleHeight(), RED);
 
     #define BACKGROUND CLITERAL(Color){ 24, 24, 24, 255 }
 
@@ -93,9 +100,13 @@ void drawMidLine() {
     DrawLine(_getHalfScreenWidth(), 0, _getHalfScreenWidth(), GetScreenHeight(), WHITE);
 }
 
+int _getFontPadding() {
+    return ceilf(GetScreenHeight()*0.04444f);
+}
+
 void drawScores() {
-    DrawText(TextFormat("%i", ai_score), _getHalfScreenWidth()/2 -20, 20, 80, WHITE);
-    DrawText(TextFormat("%i", player_score), 3*_getHalfScreenWidth()/2 -20, 20, 80, WHITE);
+    DrawText(TextFormat("%i", ai_score), _getQuarterScreenWidth() - _getFontPadding(), _getFontPadding(), _getFontSize(), WHITE);
+    DrawText(TextFormat("%i", player_score), 3*_getQuarterScreenWidth() - _getFontPadding(), _getFontPadding(), _getFontSize(), WHITE);
 }
 
 void makeBall(Ball* b, float cx, float cy, float r, Color c) {
@@ -122,8 +133,8 @@ void updateBall(Ball* b) {
 }
 
 void resetBall(Ball* b) {
-    b->cx = GetScreenWidth()*0.5;
-    b->cy = GetScreenHeight()*0.5;
+    b->cx = _getHalfScreenWidth();
+    b->cy = _getHalfScreenHeight();
 
     int speed_choice[2] = {-1, 1};
     b->sx *= speed_choice[GetRandomValue(0, 1)];
@@ -144,6 +155,10 @@ void drawPaddle(Paddle* p) {
 }
 
 void updatePaddle(Paddle* p) {
+    if (IsWindowResized()) {
+        p->x = GetScreenWidth() - _getPaddleWidth() - _getPadding();
+    }
+
     if (IsKeyDown(KEY_UP)) {
         p->y -= p->s;
     }
@@ -154,18 +169,22 @@ void updatePaddle(Paddle* p) {
 }
 
 void resetPaddle(Paddle* player, Paddle* ai) {
-    ai->x = 10;
-    ai->y = _getHalfScreenHeight() - ai->h*0.5;
+    ai->x = _getPadding();
+    ai->y = _getHalfScreenHeight() - _getHalfPaddleHeight();
 
-    player->x = GetScreenWidth() - player->w - 10;
-    player->y = _getHalfScreenHeight() - player->h*0.5;
+    player->x = GetScreenWidth() - _getHalfPaddleWidth() - _getPadding();
+    player->y = _getHalfScreenHeight() - _getHalfPaddleHeight();
 }
 
 void updateAI(Paddle* p, Ball* b) {
-    if (p->y + p->h/2 > b->cy) {
+    if (IsWindowResized()) {
+        p->x = _getPadding();
+    }
+
+    if (p->y + _getHalfPaddleHeight() > b->cy) {
         p->y -= p->s;
     }
-    if (p->y + p->h/2 <= b->cy) {
+    if (p->y + _getHalfPaddleHeight() <= b->cy) {
         p->y += p->s;
     }
     _bounds_check(&p->y, &p->h);
@@ -194,11 +213,13 @@ void _updateScore(Ball* b, Paddle* p, Paddle* ai){
         ai_score++;
         resetBall(b);
         resetPaddle(p, ai);
+        return;
     }
     if (b->cx - b->radius <= 0) {
         player_score++;
         resetBall(b);
         resetPaddle(p, ai);
+        return;
     }
 }
 
@@ -213,9 +234,45 @@ void _checkBallPaddleCollision(Ball* b, Paddle* p, Paddle* ai) {
 }
 
 int _getHalfScreenWidth() {
-    return GetScreenWidth()*0.5;
+    return GetScreenWidth()*0.5f;
 }
 
 int _getHalfScreenHeight() {
-    return GetScreenHeight()*0.5;
+    return GetScreenHeight()*0.5f;
+}
+
+int _getQuarterScreenWidth() {
+    return GetScreenWidth()*0.25f;
+}
+
+int _getQuarterScreenHeight() {
+    return GetScreenHeight()*0.25f;
+}
+
+int _getPaddleWidth() {
+    return ceilf(GetScreenWidth()*0.0125f);
+}
+
+int _getPaddleHeight() {
+    return ceilf(GetScreenHeight()*0.26666666f);
+}
+
+int _getHalfPaddleWidth() {
+    return ceilf(_getPaddleWidth()*0.5f);
+}
+
+int _getHalfPaddleHeight() {
+    return ceilf(_getPaddleHeight()*0.5f);
+}
+
+int _getBallRadius() {
+    return ceilf(GetScreenWidth()*0.0095f);
+}
+
+int _getPadding() {
+    return ceilf(GetScreenWidth()*0.0125f);
+}
+
+int _getFontSize() {
+    return ceilf(GetScreenWidth()*0.038f);
 }
